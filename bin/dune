@@ -1,4 +1,0 @@
-(executable
- (public_name system_f)
- (name main)
- (libraries system_f))
