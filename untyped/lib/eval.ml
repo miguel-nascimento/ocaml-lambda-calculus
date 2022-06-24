@@ -21,31 +21,3 @@ let rec eval expr ctx =
       | V_Closure { ctx; param; body } ->
           eval body (Context.add param arg_res ctx)
       | _ -> failwith "Non-function application")
-
-let lamb_true =
-  Lamb { param = "t"; body = Lamb { param = "f"; body = Var "t" } }
-
-let lamb_false =
-  Lamb { param = "t"; body = Lamb { param = "f"; body = Var "f" } }
-
-let ifelse =
-  Lamb
-    {
-      param = "c";
-      body =
-        Lamb
-          {
-            param = "if_t";
-            body =
-              Lamb
-                {
-                  param = "if_f";
-                  body =
-                    App
-                      {
-                        f = App { f = Var "c"; arg = Var "if_t" };
-                        arg = Var "if_f";
-                      };
-                };
-          };
-    }
