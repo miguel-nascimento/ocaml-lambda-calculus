@@ -1,5 +1,7 @@
-module Context = Map.Make (String)
 open Expr
+open Typ
+module Context = Map.Make (String)
+module TypContext = Map.Make (String)
 
 type value =
   | V_Lit of lit
@@ -14,10 +16,26 @@ let rec eval expr ctx =
   match expr with
   | Var name -> Context.find name ctx
   | Lit lit -> V_Lit lit
-  | Lamb { param; body } -> V_Closure { ctx; param; body }
+  | Lamb { param; param_typ = _; body } -> V_Closure { ctx; param; body }
   | App { f; arg } -> (
       let arg_res = eval arg ctx in
       match eval f ctx with
       | V_Closure { ctx; param; body } ->
           eval body (Context.add param arg_res ctx)
       | _ -> failwith "Non-function application")
+
+let rec infer expr typ_ctx =
+  match expr with
+  | Var name -> TypContext.find name typ_ctx
+  | Lit lit -> lit_to_typ lit
+  | Lamb { param; param_typ; body } ->
+      let new_ctx = TypContext.add param param_typ typ_ctx in
+      let return_typ = infer body new_ctx in
+      T_arrow { param_typ; body_typ = return_typ }
+  | App { f; arg } -> (
+      let f_typ, arg_typ = (infer f typ_ctx, infer arg typ_ctx) in
+      match f_typ with
+      | T_arrow { param_typ; body_typ } ->
+          if param_typ == arg_typ then body_typ
+          else failwith "Wrong function type"
+      | _ -> failwith "LHS is not a lambda.")
