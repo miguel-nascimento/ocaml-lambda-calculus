@@ -4,18 +4,18 @@ module Context = Map.Make (String)
 module TypContext = Map.Make (String)
 
 type value =
-  | V_Lit of lit
+  | V_Int of int
   | V_Closure of { ctx : value Context.t; param : string; body : expr }
 
 let value_pp value =
   match value with
   | V_Closure _ -> Printf.printf "closure\n"
-  | V_Lit x -> lit_pp x
+  | V_Int x -> Printf.printf "%i" x
 
 let rec eval expr ctx =
   match expr with
   | Var name -> Context.find name ctx
-  | Lit lit -> V_Lit lit
+  | Int x -> V_Int x
   | Lamb { param; param_typ = _; body } -> V_Closure { ctx; param; body }
   | App { f; arg } -> (
       let arg_res = eval arg ctx in
@@ -27,7 +27,7 @@ let rec eval expr ctx =
 let rec infer expr typ_ctx =
   match expr with
   | Var name -> TypContext.find name typ_ctx
-  | Lit lit -> lit_to_typ lit
+  | Int _ -> T_int
   | Lamb { param; param_typ; body } ->
       let new_ctx = TypContext.add param param_typ typ_ctx in
       let return_typ = infer body new_ctx in
@@ -37,5 +37,5 @@ let rec infer expr typ_ctx =
       match f_typ with
       | T_arrow { param_typ; body_typ } ->
           if param_typ == arg_typ then body_typ
-          else failwith "Wrong function type"
+          else failwith "Wrong function type."
       | _ -> failwith "LHS is not a lambda.")
