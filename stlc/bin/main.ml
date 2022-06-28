@@ -1,6 +1,6 @@
-open Sltc.Eval
-open Sltc.Expr
-open Sltc.Typ
+open Stlc.Eval
+open Stlc.Expr
+open Stlc.Typ
 
 let int_id = Lamb { param = "x"; param_typ = T_int; body = Var "x" }
 
