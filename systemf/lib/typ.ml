@@ -9,6 +9,8 @@ let rec typ_pp typ =
   match typ with
   | T_var x -> x
   | T_int -> "Int"
+  | T_arrow { param_typ = T_arrow _ as param_typ; body_typ } ->
+      "(" ^ typ_pp param_typ ^ ") -> " ^ typ_pp body_typ
   | T_arrow { param_typ; body_typ } ->
       typ_pp param_typ ^ " -> " ^ typ_pp body_typ
   | T_forall { name; body } -> "∀" ^ name ^ ". " ^ typ_pp body
