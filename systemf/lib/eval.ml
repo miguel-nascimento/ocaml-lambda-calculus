@@ -8,16 +8,14 @@ type value =
   | V_Closure of { ctx : value Context.t; param : string; body : expr }
 
 let value_pp value =
-  match value with
-  | V_Closure _ -> Printf.printf "closure\n"
-  | V_Int x -> Printf.printf "%i" x
+  match value with V_Closure _ -> "closure\n" | V_Int x -> string_of_int x
 
 let rec eval expr ctx =
   match expr with
   | Var name -> Context.find name ctx
   | L_int x -> V_Int x
-  | T_lamb { typ_param; body } -> failwith "TODO: T_lam"
-  | T_app { expr; typ } -> failwith "TODO: T_app"
+  | T_lamb { typ_param = _; body } -> eval body ctx
+  | T_app { expr; typ = _ } -> eval expr ctx
   | Lamb { param; param_typ = _; body } -> V_Closure { ctx; param; body }
   | App { f; arg } -> (
       let arg_res = eval arg ctx in
@@ -36,10 +34,7 @@ let rec infer expr ctx =
   | T_app { expr; typ } -> (
       let expr_typ = infer expr ctx in
       match expr_typ with
-      | T_forall { name; body } -> (
-          match body with
-          | T_var var -> if var == name then typ else T_var var
-          | _ -> failwith "TODO: forall body subst?")
+      | T_forall { name; body } -> subst body ~from:name ~_to:typ
       | _ -> failwith "Need to be a forall")
   | Lamb { param; param_typ; body } ->
       let new_ctx = TypContext.add param param_typ ctx in
@@ -51,4 +46,5 @@ let rec infer expr ctx =
       | T_arrow { param_typ; body_typ } ->
           if param_typ == arg_typ then body_typ
           else failwith "Wrong function type."
-      | _ -> failwith "LHS is not a lambda.")
+      | _ -> failwith "LHS is not a lambda or you forgot to do Type Application"
+      )
