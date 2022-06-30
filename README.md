@@ -6,5 +6,5 @@ This repo is the OCaml version of [my previously journey with Haskell](https://g
 
 - [x] [Untyped Lambda Calculus](/untyped)
 - [x] [Simply Typed Lambda Calculus λ→](/stlc)
-- [ ] System F
+- [ ] [System F](/systemf)
 - [ ] LambdaPi (Dependent Types)
