@@ -44,7 +44,7 @@ let rec infer expr ctx =
       let f_typ, arg_typ = (infer f ctx, infer arg ctx) in
       match f_typ with
       | T_arrow { param_typ; body_typ } ->
-          if param_typ == arg_typ then body_typ
+          if equal param_typ arg_typ then body_typ
           else failwith "Wrong function type."
       | _ -> failwith "LHS is not a lambda or you forgot to do Type Application"
       )
