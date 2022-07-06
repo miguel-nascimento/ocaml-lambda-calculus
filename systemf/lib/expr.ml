@@ -18,6 +18,8 @@ let rec expr_pp expr =
   | Lamb { param; param_typ; body } ->
       "λ" ^ param ^ ":(" ^ typ_pp param_typ ^ "). " ^ expr_pp body
   | App { f = App _ as f; arg } -> "(" ^ expr_pp f ^ " " ^ expr_pp arg ^ ")"
+  | App { f; arg = Lamb _ as arg } ->
+      "(" ^ expr_pp f ^ " (" ^ expr_pp arg ^ "))"
   | App { f; arg } -> "(" ^ expr_pp f ^ " " ^ expr_pp arg ^ ")"
   | L_int i -> string_of_int i
   | T_lamb { typ_param; body } -> "Λ" ^ typ_param ^ ". " ^ expr_pp body

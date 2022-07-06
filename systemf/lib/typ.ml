@@ -15,6 +15,7 @@ let rec typ_pp typ =
       typ_pp param_typ ^ " -> " ^ typ_pp body_typ
   | T_forall { name; body } -> "∀" ^ name ^ ". " ^ typ_pp body
 
+(* TODO: this is tail recursive? I really dunno *)
 let rec subst typ ~from ~_to =
   match typ with
   | T_int -> T_int
