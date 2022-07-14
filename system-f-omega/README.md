@@ -1,0 +1,3 @@
+### OCaml debug
+
+OCAMLRUNPARAM=b
