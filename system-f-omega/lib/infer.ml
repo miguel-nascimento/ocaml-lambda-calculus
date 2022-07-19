@@ -6,10 +6,7 @@ module KindContext = Map.Make (String)
 let rec infer_kind typ ctx =
   match typ with
   | T_int -> K_star
-  | T_var name ->
-      Printf.printf "%s: %s\n" name (kind_pp (KindContext.find name ctx));
-      Printf.printf "%s\n" name;
-      KindContext.find name ctx
+  | T_var name -> KindContext.find name ctx
   | T_lamb { name; kind; body } ->
       let new_ctx = KindContext.add name kind ctx in
       let body_kind = infer_kind body new_ctx in
@@ -38,12 +35,11 @@ let rec infer_kind typ ctx =
 
 let rec infer expr ctx kind_ctx =
   match expr with
-  | Var name ->
-      Printf.printf "%s: %s\n" name (typ_pp (TypContext.find name ctx));
-      TypContext.find name ctx
+  | Var name -> TypContext.find name ctx
   | L_int _ -> T_int
   | TE_lamb { typ_param; kind; body } ->
-      let typ = infer body ctx kind_ctx in
+      let kind_new_ctx = KindContext.add typ_param kind kind_ctx in
+      let typ = infer body ctx kind_new_ctx in
       T_forall { name = typ_param; kind; body = typ }
   | TE_app { expr; typ } -> (
       let expr_typ, te_kind =
@@ -73,5 +69,9 @@ let rec infer expr ctx kind_ctx =
               "Type mismatch:\n\tGot Type: \t%s \n\tExpected Type: \t%s\n\n"
               (typ_pp param_typ) (typ_pp f_typ);
             failwith "Wrong function type.")
-      | _ -> failwith "LHS is not a lambda or you forgot to do Type Application"
-      )
+      | _ ->
+          Printf.printf "\n'%s' is not a lambda\n" (expr_pp f);
+          Printf.printf "Trying to app '%s' '%s'\n" (expr_pp f) (expr_pp arg);
+          Printf.printf "Type of f: \t%s\n" (typ_pp f_typ);
+          Printf.printf "Type of arg: \t%s\n" (typ_pp arg_typ);
+          failwith "LHS is not a lambda or you forgot to do Type Application")

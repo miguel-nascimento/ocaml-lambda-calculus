@@ -1,4 +1,4 @@
 (executable
- (public_name systemfomega)
+ (public_name system_f_omega)
  (name main)
- (libraries systemfomega))
+ (libraries system_f_omega))
