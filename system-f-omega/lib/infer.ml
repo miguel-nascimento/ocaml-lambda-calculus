@@ -6,7 +6,16 @@ module KindContext = Map.Make (String)
 let rec infer_kind typ ctx =
   match typ with
   | T_int -> K_star
-  | T_var name -> KindContext.find name ctx
+  | T_var name -> (
+      match KindContext.find_opt name ctx with
+      | Some x -> x
+      | None ->
+          Printf.printf "\o033[31mKind for T_var '%s' not found.\o033[0m\n" name;
+          Printf.printf "Kind Context dump: \n";
+          KindContext.iter
+            (fun x y -> Printf.printf "  type: %s \tkind: %s\n" x (kind_pp y))
+            ctx;
+          failwith "Couldn't find type kind")
   | T_lamb { name; kind; body } ->
       let new_ctx = KindContext.add name kind ctx in
       let body_kind = infer_kind body new_ctx in
@@ -17,8 +26,8 @@ let rec infer_kind typ ctx =
       | K_arrow { param_kind; body_kind } ->
           if kind_equal param_kind arg_kind then body_kind
           else (
-            Printf.printf
-              "Kind mismatch:\n\tGot Type: \t%s \n\tExpected Type: \t%s\n\n"
+            Printf.printf "\o033[31mKind mismatch:\o033[0m\n\n\t";
+            Printf.printf "Got Type: \t%s \n\tExpected Type: \t%s\n\n"
               (kind_pp param_kind) (kind_pp f_kind);
             failwith "Wrong type-level kind type.")
       | _ -> failwith "LHS not type lambda")
@@ -65,12 +74,12 @@ let rec infer expr ctx kind_ctx =
       | T_arrow { param_typ; body_typ } ->
           if equal param_typ arg_typ then body_typ
           else (
-            Printf.printf
-              "Type mismatch:\n\tGot Type: \t%s \n\tExpected Type: \t%s\n\n"
+            Printf.printf "\o033[31mType Mismatch\o033[0m\n";
+            Printf.printf "\tGot Type: \t%s \n\tExpected Type: \t%s\n\n"
               (typ_pp param_typ) (typ_pp f_typ);
             failwith "Wrong function type.")
       | _ ->
-          Printf.printf "\n'%s' is not a lambda\n" (expr_pp f);
+          Printf.printf "\n'%s' is not a lambda\n\n" (expr_pp f);
           Printf.printf "Trying to app '%s' '%s'\n" (expr_pp f) (expr_pp arg);
           Printf.printf "Type of f: \t%s\n" (typ_pp f_typ);
           Printf.printf "Type of arg: \t%s\n" (typ_pp arg_typ);

@@ -29,3 +29,8 @@ let t_int = T_int
 let forall (name, kind) body = T_forall { name; kind; body }
 
 let t_app ~f ~arg = T_app { f; arg }
+
+let t_exist (name, kind) body =
+  forall ("y", kind) (forall (name, kind) body --> t_var "y" --> t_var "y")
+
+let product_typ x y = forall ("r", star) (x --> y) --> t_var "r"
